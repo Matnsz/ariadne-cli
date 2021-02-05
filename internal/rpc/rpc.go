@@ -1,4 +1,4 @@
-package ariadne
+package rpc
 
 import (
 	"errors"
@@ -180,7 +180,7 @@ func watchedDirs() []WatchedDirsState {
 	return rows
 }
 
-func root(args []string) error {
+func Root(args []string) error {
 	if len(args) < 1 {
 		return errors.New(usage)
 	} else {
