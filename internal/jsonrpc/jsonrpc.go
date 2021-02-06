@@ -1,7 +1,6 @@
-package rpc
+package jsonrpc
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -14,15 +13,6 @@ import (
 
 // get RPC client by dialing at `rpc.DefaultRPCPath` endpoint
 var client, _ = rpc.DialHTTP("tcp", "localhost:9000")
-var usage = `Usage: ariadne-cli <command> [<arg>]
-
-<Commands>
-help : to get this help message
-stop-daemon : to stop the ariadne indexing daemon
-watched-dirs : to get a list from the currently watched directories
-add <args> : to add a new directory/directories to the index
-remove <args> : to remove directory/directories with the id <arg> from the index
-search <arg> : search lists files and you can filter it with 'arg'`
 
 type Query struct {
 	Base string
@@ -51,7 +41,7 @@ func isValidDir(path string) bool {
 	}
 }
 
-func addDir(toAdd []string) []string {
+func AddDir(toAdd []string) []string {
 
 	for _, path := range toAdd {
 		if !isValidDir(path) {
@@ -66,7 +56,7 @@ func addDir(toAdd []string) []string {
 	return added
 }
 
-func rmDir(toRm []int) []int {
+func RmDir(toRm []int) []int {
 	var removed []int
 	if err := client.Call("RemoteCall.Remove", toRm, &removed); err != nil {
 		log.Fatal("RemoteCall.Remove -> Error:", err)
@@ -74,7 +64,7 @@ func rmDir(toRm []int) []int {
 	return removed
 }
 
-func search(s string) []FileProperties {
+func Search(s string) []FileProperties {
 	var rows []FileProperties
 	if err := client.Call("RemoteCall.Search", s, &rows); err != nil {
 		log.Fatal("RemoteCall.Search -> Error:", err)
@@ -108,7 +98,7 @@ func prettyDir(isDir bool) string {
 	}
 }
 
-func readableRows(fps []FileProperties) [][]string {
+func ReadableRows(fps []FileProperties) [][]string {
 	rows := make([][]string, 0, len(fps))
 
 	for _, fp := range fps {
@@ -119,7 +109,7 @@ func readableRows(fps []FileProperties) [][]string {
 	return rows
 }
 
-func format(rows [][]string) []string {
+func Format(rows [][]string) []string {
 
 	lines := make([]string, 0, len(rows)+2)
 	header := []string{"path", "name", "size", "date", "type"}
@@ -162,7 +152,7 @@ func format(rows [][]string) []string {
 	return lines
 }
 
-func stopDaemon() {
+func StopDaemon() {
 	var signal struct{}
 
 	if err := client.Call("RemoteCall.StopDaemon", signal, &signal); err != nil {
@@ -172,65 +162,10 @@ func stopDaemon() {
 	}
 }
 
-func watchedDirs() []WatchedDirsState {
+func WatchedDirs() []WatchedDirsState {
 	var rows []WatchedDirsState
 	if err := client.Call("RemoteCall.WatchedDirs", struct{}{}, &rows); err != nil {
 		log.Fatal("RemoteCall.WatchedDirs -> Error:", err)
 	}
 	return rows
-}
-
-func Root(args []string) error {
-	if len(args) < 1 {
-		return errors.New(usage)
-	} else {
-		switch args[0] {
-		case "stop-daemon":
-			stopDaemon()
-			return nil
-		case "help":
-			fmt.Println(usage)
-			return nil
-		case "watched-dirs":
-			ws := watchedDirs()
-			for _, w := range ws {
-				fmt.Println(w)
-			}
-			return nil
-		case "search":
-			searchString := ""
-			if len(args) == 2 {
-				searchString = args[1]
-			}
-			rows := search(searchString)
-			for _, row := range format(readableRows(rows)) {
-				fmt.Println(row)
-			}
-			return nil
-		case "add":
-			added := addDir(args[1:])
-			fmt.Println("The following dirs added successfully:")
-			for _, a := range added {
-				fmt.Println(a)
-			}
-			return nil
-		case "remove":
-			var intArgs []int
-			for _, a := range args[1:] {
-				if i, err := strconv.Atoi(a); err != nil {
-					log.Fatal("Error: cannot convert" + a + "to integer. Please give integer as parameter!")
-				} else {
-					intArgs = append(intArgs, i)
-				}
-			}
-			removed := rmDir(intArgs)
-			fmt.Println("The following dirs removed successfully:")
-			for _, r := range removed {
-				fmt.Println(r)
-			}
-			return nil
-		default:
-			return errors.New(usage)
-		}
-	}
 }
