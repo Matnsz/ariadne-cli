@@ -1,4 +1,4 @@
-module github.com/Matnsz/ariadne-cli
+module github.com/ariadne-tools/ariadne-cli
 
 go 1.15
 

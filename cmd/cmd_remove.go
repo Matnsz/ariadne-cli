@@ -5,7 +5,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/Matnsz/ariadne-cli/internal/jsonrpc"
+	"github.com/ariadne-tools/ariadne-cli/internal/jsonrpc"
 
 	//    "errors"
 

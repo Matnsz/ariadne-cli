@@ -53,9 +53,9 @@ import (
 
 // config contains the configuration for the program to build.
 var config = Config{
-	Name:             "ariadne-cli",                                 // name of the program executable and directory
-	Namespace:        "github.com/Matnsz/ariadne-cli",               // subdir of GOPATH, e.g. "github.com/foo/bar"
-	Main:             "./cmd/",                           // package name for the main package
+	Name:             "ariadne-cli",                            // name of the program executable and directory
+	Namespace:        "github.com/ariadne-tools/ariadne-cli",   // subdir of GOPATH, e.g. "github.com/foo/bar"
+	Main:             "./cmd/",                                 // package name for the main package
 	DefaultBuildTags: []string{"selfupdate"},                   // specify build tags which are always used
 	Tests:            []string{"./..."},                        // tests to run
 	MinVersion:       GoVersion{Major: 1, Minor: 11, Patch: 0}, // minimum Go version supported
